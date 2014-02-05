@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Entity;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Net;
 using System.Web;
@@ -53,7 +54,7 @@ namespace ContosoUniversity.Controllers
                     students = students.OrderBy(s => s.LastName);
                     break;
             }
-            int pageSize = 3;
+            int pageSize = 5;
             int pageNumber = (page ?? 3);
             IPagedList<Student> studentsPage = students.ToPagedList(pageNumber, pageSize);
             return View(studentsPage);
@@ -92,7 +93,7 @@ namespace ContosoUniversity.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            catch(DataException ex) {
+            catch(RetryLimitExceededException ex) {
                 ModelState.AddModelError("", "could not save changes");
             }
 
@@ -128,7 +129,7 @@ namespace ContosoUniversity.Controllers
                     return RedirectToAction("Index");
                 }
             }
-            catch (DataException)
+            catch (RetryLimitExceededException)
             {
                 ModelState.AddModelError("", "could not save changes");
             }
@@ -165,7 +166,7 @@ namespace ContosoUniversity.Controllers
                 db.Students.Remove(student);
                 db.SaveChanges();
             }
-            catch (DataException)
+            catch (RetryLimitExceededException)
             {
                 return RedirectToAction("Delete", new { id=id, saveChangesError=true});                
             }

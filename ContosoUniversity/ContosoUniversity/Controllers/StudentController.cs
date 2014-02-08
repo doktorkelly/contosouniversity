@@ -55,7 +55,7 @@ namespace ContosoUniversity.Controllers
                     break;
             }
             int pageSize = 5;
-            int pageNumber = (page ?? 3);
+            int pageNumber = (page ?? 1);
             IPagedList<Student> studentsPage = students.ToPagedList(pageNumber, pageSize);
             return View(studentsPage);
         }

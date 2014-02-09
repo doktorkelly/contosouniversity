@@ -41,12 +41,12 @@
         </div>
 
         <div class="form-group">
-            @Html.LabelFor(model => model.DepartmentID, "DepartmentID", new { @class = "control-label col-md-2" })
-            <div class="col-md-10">
-                @Html.DropDownList("DepartmentID", String.Empty)
-                @Html.ValidationMessageFor(model => model.DepartmentID)
-            </div>
-        </div>
+            <label class="control-label col-md-2" for="DepartmentID">Department</label>
+                <div class="col-md-10">
+                    @Html.DropDownList("DepartmentID", String.Empty)
+                    @Html.ValidationMessageFor(model => model.DepartmentID)
+                </div>
+</div>
 
         <div class="form-group">
             <div class="col-md-offset-2 col-md-10">

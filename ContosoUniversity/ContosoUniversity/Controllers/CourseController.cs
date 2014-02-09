@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using ContosoUniversity.Models;
 using ContosoUniversity.DAC;
+using System.Data.Entity.Infrastructure;
 
 namespace ContosoUniversity.Controllers
 {
@@ -40,7 +41,7 @@ namespace ContosoUniversity.Controllers
         // GET: /Course/Create
         public ActionResult Create()
         {
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name");
+            ViewBag.DepartmentID = DepartmentsDropDownList();
             return View();
         }
 
@@ -49,14 +50,17 @@ namespace ContosoUniversity.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult Create([Bind(Include="CourseID,Title,Credits,DepartmentID")] Course course)
         {
-            if (ModelState.IsValid)
-            {
-                db.Courses.Add(course);
-                db.SaveChanges();
-                return RedirectToAction("Index");
+            try {
+                if (ModelState.IsValid) {
+                    db.Courses.Add(course);
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
             }
-
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name", course.DepartmentID);
+            catch (RetryLimitExceededException dex) {
+                ModelState.AddModelError("", "unable to save changes");
+            }
+            ViewBag.DepartmentID = DepartmentsDropDownList(course.DepartmentID);
             return View(course);
         }
 
@@ -72,24 +76,29 @@ namespace ContosoUniversity.Controllers
             {
                 return HttpNotFound();
             }
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name", course.DepartmentID);
+            ViewBag.DepartmentID = DepartmentsDropDownList(course.DepartmentID);
             return View(course);
         }
 
         // POST: /Course/Edit/5
-        // Aktivieren Sie zum Schutz vor übermäßigem Senden von Angriffen die spezifischen Eigenschaften, mit denen eine Bindung erfolgen soll. Weitere Informationen 
-        // finden Sie unter http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public ActionResult Edit([Bind(Include="CourseID,Title,Credits,DepartmentID")] Course course)
         {
-            if (ModelState.IsValid)
+            try
             {
-                db.Entry(course).State = EntityState.Modified;
-                db.SaveChanges();
-                return RedirectToAction("Index");
+                if (ModelState.IsValid)
+                {
+                    db.Entry(course).State = EntityState.Modified;
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+                }
             }
-            ViewBag.DepartmentID = new SelectList(db.Departments, "DepartmentID", "Name", course.DepartmentID);
+            catch (RetryLimitExceededException dex)
+            {
+                ModelState.AddModelError("", "unable to save changes");
+            }
+            ViewBag.DepartmentID = DepartmentsDropDownList(course.DepartmentID);
             return View(course);
         }
 
@@ -126,6 +135,14 @@ namespace ContosoUniversity.Controllers
                 db.Dispose();
             }
             base.Dispose(disposing);
+        }
+
+        private SelectList DepartmentsDropDownList(object selectedDepartment = null)
+        {
+            var departments = db.Departments
+                .OrderBy(d => d.Name)
+                .Select(d => d);
+           return new SelectList(departments, "DepartmentID", "Name", selectedDepartment);
         }
     }
 }

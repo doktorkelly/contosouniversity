@@ -11,18 +11,11 @@
 </p>
 <table class="table">
     <tr>
-        <th>
-            Last Name
-        </th>
-        <th>
-            First Name
-        </th>
-        <th>
-            Hire Date
-        </th>
-        <th>
-            Office
-        </th>
+        <th>Last Name</th>        
+        <th>First Name</th>
+        <th>Hire Date</th>
+        <th>Office</th>
+        <th>Courses</th>
         <th></th>
     </tr>
 
@@ -47,6 +40,15 @@
                 @Html.DisplayFor(modelItem => item.OfficeAssignment.Location)
             }
         </td>
+        <td>
+            @{
+                foreach (var course in item.Courses)
+                {
+                    @course.CourseID @:  @course.Title <br />
+                }
+            }
+        </td>
+
         <td>
             @Html.ActionLink("Edit", "Edit", new { id=item.ID }) |
             @Html.ActionLink("Details", "Details", new { id=item.ID }) |

@@ -1,0 +1,6 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<parameters>
+  <setParameter name="IIS Web Application Name" value="Default Web Site\contosoUniversity" />
+  <setParameter name="SchoolContext-Web.config Connection String" value="Data Source=.\sqlexpress;Initial Catalog=contoso_production;Persist Security Info=True;User ID=contosoAdmin;Password=pom22pom" />
+  <setParameter name="SchoolContext_DatabasePublish-Web.config Connection String" value="Data Source=.\sqlexpress;Initial Catalog=contoso_production;Persist Security Info=True;User ID=contosoAdmin;Password=pom22pom" />
+</parameters>

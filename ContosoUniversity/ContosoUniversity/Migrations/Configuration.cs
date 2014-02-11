@@ -121,18 +121,20 @@ namespace ContosoUniversity.Migrations
                     InstructorID = instructors.Single( i => i.LastName == "Kapoor").ID, 
                     Location = "Thompson 304" },
             };
-            officeAssignments.ForEach(s => context.OfficeAssignments.AddOrUpdate(p => p.Location, s));
+            //before: officeAssignments.ForEach(s => context.OfficeAssignments.AddOrUpdate(p => p.InstructorID, s));
+            AddOrKeepOfficeAssignments(context, officeAssignments);
+
             context.SaveChanges();
 
-            AddOrUpdateInstructor(context, "Chemistry", "Kapoor");
-            AddOrUpdateInstructor(context, "Chemistry", "Harui");
-            AddOrUpdateInstructor(context, "Microeconomics", "Zheng");
-            AddOrUpdateInstructor(context, "Macroeconomics", "Zheng");
+            AddOrKeepInstructor(context, "Chemistry", "Kapoor");
+            AddOrKeepInstructor(context, "Chemistry", "Harui");
+            AddOrKeepInstructor(context, "Microeconomics", "Zheng");
+            AddOrKeepInstructor(context, "Macroeconomics", "Zheng");
 
-            AddOrUpdateInstructor(context, "Calculus", "Fakhouri");
-            AddOrUpdateInstructor(context, "Trigonometry", "Harui");
-            AddOrUpdateInstructor(context, "Composition", "Abercrombie");
-            AddOrUpdateInstructor(context, "Literature", "Abercrombie");
+            AddOrKeepInstructor(context, "Calculus", "Fakhouri");
+            AddOrKeepInstructor(context, "Trigonometry", "Harui");
+            AddOrKeepInstructor(context, "Composition", "Abercrombie");
+            AddOrKeepInstructor(context, "Literature", "Abercrombie");
 
             context.SaveChanges();
 
@@ -193,22 +195,39 @@ namespace ContosoUniversity.Migrations
                     Grade = Grade.B         
                  }
             };
-
-            foreach (Enrollment e in enrollments)
-            {
-                var enrollmentInDataBase = context.Enrollments.Where(
-                    s =>
-                         s.Student.ID == e.StudentID &&
-                         s.Course.CourseID == e.CourseID).SingleOrDefault();
-                if (enrollmentInDataBase == null)
-                {
-                    context.Enrollments.Add(e);
-                }
-            }
+            AddOrKeepEnrollments(context, enrollments);
             context.SaveChanges();
         }
 
-        void AddOrUpdateInstructor(SchoolContext context, string courseTitle, string instructorName)
+        private void AddOrKeepEnrollments(SchoolContext context, IList<Enrollment> enrollments)
+        {
+            foreach (Enrollment e in enrollments)
+            {
+                var enrollmentInDataBase = context.Enrollments
+                    .Where(s =>
+                         s.Student.ID == e.StudentID &&
+                         s.Course.CourseID == e.CourseID).SingleOrDefault();
+                if (enrollmentInDataBase == null) {
+                    context.Enrollments.Add(e);
+                }
+            }
+        }
+
+        private void AddOrKeepOfficeAssignments(SchoolContext context, IList<OfficeAssignment> officeAssignments)
+        {
+            foreach (OfficeAssignment office in officeAssignments)
+            {
+                OfficeAssignment officeDB = context.OfficeAssignments
+                    .Where(o => o.InstructorID == office.InstructorID)
+                    .SingleOrDefault();
+                if (officeDB == null) { // if not found: add new office
+                    context.OfficeAssignments.Add(office);
+                }
+                // else (if found): dont change it
+            }
+        }
+
+        private void AddOrKeepInstructor(SchoolContext context, string courseTitle, string instructorName)
         {
             var crs = context.Courses.SingleOrDefault(c => c.Title == courseTitle);
             var inst = crs.Instructors.SingleOrDefault(i => i.LastName == instructorName);

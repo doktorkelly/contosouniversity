@@ -1,4 +1,5 @@
-﻿using ContosoUniversity.Models;
+﻿using ContosoUniversity.Migrations;
+using ContosoUniversity.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity;
@@ -24,6 +25,9 @@ namespace ContosoUniversity.DAC
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
+            //check: start migration:
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<SchoolContext, Migrations.Configuration>());
+
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
 
             modelBuilder.Entity<Course>()

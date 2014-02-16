@@ -17,6 +17,7 @@ namespace ContosoUniversity.Controllers
             return View();
         }
 
+        [Authorize]
         public ActionResult About()
         {
             var data = db.Students

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNet.Identity.EntityFramework;
+using System.Data.Entity;
+using ContosoUniversity.Migrations;
 
 namespace ContosoUniversity.DAC
 {
@@ -10,8 +12,14 @@ namespace ContosoUniversity.DAC
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         public ApplicationDbContext()
-            : base("DefaultConnection")
+            : base("SchoolContext")
         {
+        }
+
+        protected override void OnModelCreating(System.Data.Entity.DbModelBuilder modelBuilder)
+        {
+            //base.OnModelCreating(modelBuilder);
+            Database.SetInitializer(new MigrateDatabaseToLatestVersion<ApplicationDbContext, Migrations.Configuration>());
         }
     }
 }

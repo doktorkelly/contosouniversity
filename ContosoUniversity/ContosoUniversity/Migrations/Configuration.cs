@@ -13,6 +13,7 @@ namespace ContosoUniversity.Migrations
         public Configuration()
         {
             AutomaticMigrationsEnabled = true; //before: false
+            AutomaticMigrationDataLossAllowed = true;
         }
 
         protected override void Seed(SchoolContext context)

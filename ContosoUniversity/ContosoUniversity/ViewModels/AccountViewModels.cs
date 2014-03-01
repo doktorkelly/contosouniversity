@@ -26,6 +26,9 @@ namespace ContosoUniversity.ViewModels
         [Display(Name = "Neues Kennwort bestätigen")]
         [Compare("NewPassword", ErrorMessage = "Das neue Kennwort stimmt nicht mit dem Bestätigungskennwort überein.")]
         public string ConfirmPassword { get; set; }
+
+        [Display(Name = "Email Adress")]
+        public string Email { get; set; }
     }
 
     public class LoginViewModel
@@ -59,5 +62,9 @@ namespace ContosoUniversity.ViewModels
         [Display(Name = "Kennwort bestätigen")]
         [Compare("Password", ErrorMessage = "Das Kennwort stimmt nicht mit dem Bestätigungskennwort überein.")]
         public string ConfirmPassword { get; set; }
+
+        [Required]
+        [Display(Name = "Email Adress")]
+        public string Email { get; set; }
     }
 }

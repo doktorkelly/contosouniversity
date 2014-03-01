@@ -11,6 +11,9 @@ using Microsoft.Owin.Security;
 using ContosoUniversity.Models;
 using ContosoUniversity.DAC;
 using ContosoUniversity.ViewModels;
+using ContosoUniversity.Helpers;
+using Postal;
+using System.Data.Entity;
 
 namespace ContosoUniversity.Controllers
 {
@@ -29,7 +32,6 @@ namespace ContosoUniversity.Controllers
 
         public UserManager<ApplicationUser> UserManager { get; private set; }
 
-        //
         // GET: /Account/Login
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
@@ -38,7 +40,6 @@ namespace ContosoUniversity.Controllers
             return View();
         }
 
-        //
         // POST: /Account/Login
         [HttpPost]
         [AllowAnonymous]
@@ -48,7 +49,7 @@ namespace ContosoUniversity.Controllers
             if (ModelState.IsValid)
             {
                 ApplicationUser user = await UserManager.FindAsync(model.UserName, model.Password);
-                if (user != null)
+                if (user != null && user.IsConfirmed) //check
                 {
                     await SignInAsync(user, model.RememberMe);
                     return RedirectToLocal(returnUrl);
@@ -58,12 +59,10 @@ namespace ContosoUniversity.Controllers
                     ModelState.AddModelError("", "Invalid username or password.");
                 }
             }
-
             // Wurde dieser Punkt erreicht, ist ein Fehler aufgetreten; Formular erneut anzeigen.
             return View(model);
         }
 
-        //
         // GET: /Account/Register
         [AllowAnonymous]
         public ActionResult Register()
@@ -71,7 +70,6 @@ namespace ContosoUniversity.Controllers
             return View();
         }
 
-        //
         // POST: /Account/Register
         [HttpPost]
         [AllowAnonymous]
@@ -80,21 +78,61 @@ namespace ContosoUniversity.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser() { UserName = model.UserName };
+                string confirmationToken = CreateConfirmationToken();
+                ApplicationUser user = new ApplicationUser() { 
+                    UserName = model.UserName, 
+                    Email = model.Email,
+                    ConfirmationToken = confirmationToken,
+                    IsConfirmed = false
+                };
                 var result = await UserManager.CreateAsync(user, model.Password);
-                if (result.Succeeded)
-                {
-                    await SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
+                if (result.Succeeded) {
+                    //before: await SignInAsync(user, isPersistent: false);
+                    //before: return RedirectToAction("Index", "Home");
+                    SendConfirmationEmail(model.Email, model.UserName, confirmationToken);
+                    RedirectToAction("RegisterStepTwo", "Account");
                 }
-                else
-                {
+                else {
                     AddErrors(result);
                 }
             }
-
             // Wurde dieser Punkt erreicht, ist ein Fehler aufgetreten; Formular erneut anzeigen.
             return View(model);
+        }
+
+        //todo:
+        //return view with notice like this:
+        //please look into your email and click on the confirmation link        
+        [AllowAnonymous]
+        public ActionResult RegisterStepTwo()
+        {
+            return View();
+        }
+
+        //this action is called by clicking on the link in the confirmation email
+        [AllowAnonymous]
+        public ActionResult RegisterConfirmation(string confirmationToken)
+        {
+            ApplicationUser user = ConfirmAccount(confirmationToken);
+            if (user != null) {
+                return RedirectToAction("ConfirmationSuccess", new { Username = user.UserName });
+            }
+            else {
+                return RedirectToAction("ConfirmationFailure");
+            }
+        }
+
+        [AllowAnonymous]
+        public ActionResult ConfirmationSuccess(string username)
+        {
+            ViewBag.Username = username;
+            return View();
+        }
+
+        [AllowAnonymous]
+        public ActionResult ConfirmationFailure()
+        {
+            return View();
         }
 
         //
@@ -128,7 +166,15 @@ namespace ContosoUniversity.Controllers
                 : "";
             ViewBag.HasLocalPassword = HasPassword();
             ViewBag.ReturnUrl = Url.Action("Manage");
-            return View();
+            ApplicationUser user = UserManager.FindById(User.Identity.GetUserId());
+            ManageUserViewModel viewModel = new ManageUserViewModel();
+            if (user != null) {
+                viewModel.Email = user.Email;
+            }
+            else {
+                viewModel.Email = "empty email";
+            }
+            return View(viewModel);
         }
 
         //
@@ -137,6 +183,7 @@ namespace ContosoUniversity.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Manage(ManageUserViewModel model)
         {
+            //todo: user.Email = model.Email ???
             bool hasPassword = HasPassword();
             ViewBag.HasLocalPassword = hasPassword;
             ViewBag.ReturnUrl = Url.Action("Manage");
@@ -362,6 +409,38 @@ namespace ContosoUniversity.Controllers
             }
             return false;
         }
+
+        private string CreateConfirmationToken()
+        {
+            return ShortGuid.NewGuid();
+        }
+
+        private void SendConfirmationEmail(string to, string username, string token)
+        {
+            dynamic email = new Email("RegEmail");
+            email.From = "universe543@yahoo.com"; //TODO: from web.config
+            email.To = to;
+            email.UserName = username;
+            email.ConfirmationToken = token;
+            email.Url = "http://localhost:50092/Account/RegisterConfirmation"; //TODO
+            email.Send();
+        }
+
+        private ApplicationUser ConfirmAccount(string confirmationToken)
+        {
+            SchoolContext context = new SchoolContext();
+            ApplicationUser user = context.Users
+                .SingleOrDefault(u => u.ConfirmationToken == confirmationToken);
+            if (user != null)
+            {
+                user.IsConfirmed = true;
+                context.Entry(user).State = EntityState.Modified;
+                context.SaveChanges();
+            }
+            return user;
+        }
+
+
 
         public enum ManageMessageId
         {

@@ -8,19 +8,37 @@ using System.Web;
 using System.Web.Mvc;
 using ContosoUniversity.Models;
 using ContosoUniversity.DAC;
+using ContosoUniversity.DAO;
 using System.Data.Entity.Infrastructure;
 
 namespace ContosoUniversity.Controllers
 {
     public class CourseController : Controller
     {
-        private SchoolContext db = new SchoolContext();
+        //private SchoolContext db = new SchoolContext();
+        private ICourseRepository CourseRepos { get; set; }
+        private IDepartmentRepository DepartRepos { get; set; }
+
+        public CourseController()
+        {
+            SchoolContext db = new SchoolContext();
+            CourseRepos = new EFCourseRepository(db);
+            DepartRepos = new EFDepartmentRepository(db);
+        }
+
+        public CourseController(ICourseRepository courseRepos, IDepartmentRepository departRepos)
+        {
+            CourseRepos = courseRepos;
+            DepartRepos = departRepos;
+        }
 
         // GET: /Course/
         public ActionResult Index()
         {
-            var courses = db.Courses.Include(c => c.Department);
-            return View(courses.ToList());
+            //var courses = db.Courses.Include(c => c.Department);
+            //var courses = courses.ToList();
+            var courses = CourseRepos.FindAll();
+            return View(courses);
         }
 
         // GET: /Course/Details/5
@@ -30,7 +48,8 @@ namespace ContosoUniversity.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
+            //Course course = db.Courses.Find(id);
+            Course course = CourseRepos.FindById(id);
             if (course == null)
             {
                 return HttpNotFound();
@@ -52,8 +71,9 @@ namespace ContosoUniversity.Controllers
         {
             try {
                 if (ModelState.IsValid) {
-                    db.Courses.Add(course);
-                    db.SaveChanges();
+                    //db.Courses.Add(course);
+                    //db.SaveChanges();
+                    CourseRepos.Create(course);
                     return RedirectToAction("Index");
                 }
             }
@@ -71,7 +91,8 @@ namespace ContosoUniversity.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
+            //Course course = db.Courses.Find(id);
+            Course course = CourseRepos.FindById(id);
             if (course == null)
             {
                 return HttpNotFound();
@@ -89,8 +110,9 @@ namespace ContosoUniversity.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    db.Entry(course).State = EntityState.Modified;
-                    db.SaveChanges();
+                    //db.Entry(course).State = EntityState.Modified;
+                    //db.SaveChanges();
+                    CourseRepos.Update(course);
                     return RedirectToAction("Index");
                 }
             }
@@ -109,7 +131,8 @@ namespace ContosoUniversity.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Course course = db.Courses.Find(id);
+            //Course course = db.Courses.Find(id);
+            Course course = CourseRepos.FindById(id);
             if (course == null)
             {
                 return HttpNotFound();
@@ -122,9 +145,10 @@ namespace ContosoUniversity.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Course course = db.Courses.Find(id);
-            db.Courses.Remove(course);
-            db.SaveChanges();
+            //Course course = db.Courses.Find(id);
+            //db.Courses.Remove(course);
+            //db.SaveChanges();
+            CourseRepos.Delete(id);
             return RedirectToAction("Index");
         }
 
@@ -132,14 +156,14 @@ namespace ContosoUniversity.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                CourseRepos.Dispose();
             }
             base.Dispose(disposing);
         }
 
         private SelectList DepartmentsDropDownList(object selectedDepartment = null)
         {
-            var departments = db.Departments
+            var departments = DepartRepos.FindAll()
                 .OrderBy(d => d.Name)
                 .Select(d => d);
            return new SelectList(departments, "DepartmentID", "Name", selectedDepartment);

@@ -161,10 +161,8 @@
     <Compile Include="Controllers\DepartmentController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\InstructorController.cs" />
-    <Compile Include="DAO\EFCourseRepository.cs" />
-    <Compile Include="DAO\EFDepartmentRepository.cs" />
-    <Compile Include="DAO\ICourseRepository.cs" />
-    <Compile Include="DAO\IDepartmentRepository.cs" />
+    <Compile Include="DAO\EFRepository.cs" />
+    <Compile Include="DAO\IRepository.cs" />
     <Compile Include="Helpers\ShortGuid.cs" />
     <Compile Include="Controllers\StudentController.cs" />
     <Compile Include="DAC\SchoolConfiguration.cs" />

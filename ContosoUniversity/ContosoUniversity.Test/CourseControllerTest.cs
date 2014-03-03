@@ -3,6 +3,9 @@ using System.Web.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using ContosoUniversity.Controllers;
 using ContosoUniversity.DAO;
+using ContosoUniversity.Models;
+using Moq;
+using System.Collections.Generic;
 
 namespace ContosoUniversity.Test
 {
@@ -10,20 +13,49 @@ namespace ContosoUniversity.Test
     public class CourseControllerTest
     {
         [TestMethod]
-        public void Index()
+        public void Index_WithCoursesInRepos_ReturnsModelWithCourses()
         {
             //arrange
-            //TODO:
-            //ICourseRepository courseRepos = null;
-            //IDepartmentRepository departRepos = null;
-            //CourseController controller = new CourseController(courseRepos, departRepos);
-            CourseController controller = new CourseController();
+            var reposCourseMock = new Mock<IRepository<Course>>();
+            IEnumerable<Course> courses = new List<Course>() {
+                new Course() {CourseID=10, Title="course01", Credits=1},
+                new Course() {CourseID=11, Title="course02", Credits=2}
+            };
+            reposCourseMock
+                .Setup(repos => repos.FindAll())
+                .Returns(courses);
+            CourseController controller = new CourseController(
+                reposCourseMock.Object, null);
 
             //act
             ViewResult result = controller.Index() as ViewResult;
 
             //assert
-            Assert.IsTrue(string.IsNullOrEmpty(result.ViewName));
+            //Assert.IsTrue(string.IsNullOrEmpty(result.ViewName));
+            //Assert.AreEqual("Index", result.ViewName);
+            var model = result.ViewData.Model as List<Course>;
+            Assert.AreEqual(2, model.Count);
+        }
+
+        [TestMethod]
+        public void Create_WithCourseParam_CallsReposCreate()
+        {
+            //arrange
+            var reposCourseMock = new Mock<IRepository<Course>>();
+            Course course = new Course() {
+                CourseID = 10,
+                Title = "course01",
+                Credits = 2
+            };
+            CourseController controller = new CourseController(
+                reposCourseMock.Object, null);
+
+            //act
+            var result = controller.Create(course) as RedirectToRouteResult;
+
+            //assert
+            reposCourseMock.Verify(r => r.Create(course), Times.Once());
+            //Assert.AreEqual("Index", result.RouteValues["action"]);
         }
     }
 }

@@ -4,13 +4,26 @@ using System.Linq;
 using System.Web;
 using System.Web.Mvc;
 using ContosoUniversity.DAC;
+using ContosoUniversity.DAO;
+using ContosoUniversity.Models;
 using ContosoUniversity.ViewModels;
 
 namespace ContosoUniversity.Controllers
 {
     public class HomeController : Controller
     {
-        private SchoolContext db = new SchoolContext();
+        private IRepository<Student> StudentRepos { get; set; }
+
+        public HomeController()
+        {
+            SchoolContext db = new SchoolContext();
+            StudentRepos = new EFRepository<Student>(db);
+        }
+
+        public HomeController(IRepository<Student> studentRepos)
+        {
+            StudentRepos = studentRepos;
+        }
 
         public ActionResult Index()
         {
@@ -20,13 +33,13 @@ namespace ContosoUniversity.Controllers
         [Authorize]
         public ActionResult About()
         {
-            var data = db.Students
+            var model = StudentRepos.FindAll()
                 .GroupBy(s => s.EnrollmentDate)
                 .Select(group => new EnrollmentDateGroup() {
                     EnrollmentDate = group.Key,
                     StudentCount = group.Count()
                 });
-            return View(data);
+            return View(model);
         }
 
         public ActionResult Contact()
@@ -38,7 +51,7 @@ namespace ContosoUniversity.Controllers
 
         protected override void Dispose(bool disposing)
         {
-            db.Dispose();
+            StudentRepos.Dispose();
             base.Dispose(disposing);
         }
     }

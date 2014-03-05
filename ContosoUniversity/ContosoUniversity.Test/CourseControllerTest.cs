@@ -55,7 +55,22 @@ namespace ContosoUniversity.Test
 
             //assert
             reposCourseMock.Verify(r => r.Create(course), Times.Once());
-            //Assert.AreEqual("Index", result.RouteValues["action"]);
+            Assert.AreEqual("Index", result.RouteValues["action"]);
+        }
+
+        [TestMethod]
+        public void DeleteConfirmed_WithParamId_CallsReposRemove()
+        {
+            //arrange
+            var reposCourseMock = new Mock<IRepository<Course>>();
+            var controller = new CourseController(reposCourseMock.Object, null);
+
+            //act
+            var result = controller.DeleteConfirmed(1) as RedirectToRouteResult;
+
+            //assert
+            reposCourseMock.Verify(r => r.Remove(1), Times.Once());
+            Assert.AreEqual("Index", result.RouteValues["action"]);
         }
     }
 }

@@ -8,29 +8,46 @@ using System.Net;
 using System.Web;
 using System.Web.Mvc;
 using ContosoUniversity.Models;
+using ContosoUniversity.DAO;
 using ContosoUniversity.DAC;
 
 namespace ContosoUniversity.Controllers
 {
     public class DepartmentController : Controller
     {
-        private SchoolContext db = new SchoolContext();
+        private IRepository<Department> DepartRepos { get; set; }
+        private IRepository<Instructor> InstructorRepos { get; set; }
+
+        public DepartmentController()
+        {
+            SchoolContext db = new SchoolContext();
+            DepartRepos = new EFRepository<Department>(db);
+            InstructorRepos = new EFRepository<Instructor>(db);
+        }
+
+        public DepartmentController(IRepository<Department> departRepos, IRepository<Instructor> instructorRepos)
+        {
+            DepartRepos = departRepos;
+            InstructorRepos = instructorRepos;
+        }
 
         // GET: /Department/
-        public async Task<ActionResult> Index()
+        public ActionResult Index()
         {
-            var departments = db.Departments.Include(d => d.Administrator);
-            return View(await departments.ToListAsync());
+            //var db = new SchoolContext();
+            //var departments0 = db.Departments.Include(d => d.Administrator);
+            var departments = DepartRepos.FindAll();
+            return View(departments);
         }
 
         // GET: /Department/Details/5
-        public async Task<ActionResult> Details(int? id)
+        public ActionResult Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Department department = await db.Departments.FindAsync(id);
+            Department department = DepartRepos.FindById(id);
             if (department == null)
             {
                 return HttpNotFound();
@@ -41,69 +58,66 @@ namespace ContosoUniversity.Controllers
         // GET: /Department/Create
         public ActionResult Create()
         {
-            ViewBag.InstructorID = new SelectList(db.Instructors, "ID", "LastName");
+            IEnumerable<Instructor> instructors = InstructorRepos.FindAll();
+            ViewBag.InstructorID = new SelectList(instructors, "ID", "LastName");
             return View();
         }
 
         // POST: /Department/Create
-        // Aktivieren Sie zum Schutz vor übermäßigem Senden von Angriffen die spezifischen Eigenschaften, mit denen eine Bindung erfolgen soll. Weitere Informationen 
-        // finden Sie unter http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include="DepartmentID,Name,Budget,StartDate,InstructorID")] Department department)
+        public ActionResult Create([Bind(Include="DepartmentID,Name,Budget,StartDate,InstructorID")] Department department)
         {
             if (ModelState.IsValid)
             {
-                db.Departments.Add(department);
-                await db.SaveChangesAsync();
+                //db.Departments.Add(department);
+                //await db.SaveChangesAsync();
+                DepartRepos.Create(department);
                 return RedirectToAction("Index");
             }
-
-            ViewBag.InstructorID = new SelectList(db.Instructors, "ID", "LastName", department.InstructorID);
+            var instructors = InstructorRepos.FindAll();
+            ViewBag.InstructorID = new SelectList(instructors, "ID", "LastName", department.InstructorID);
             return View(department);
         }
 
         // GET: /Department/Edit/5
-        public async Task<ActionResult> Edit(int? id)
+        public ActionResult Edit(int? id)
         {
-            if (id == null)
-            {
+            if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Department department = await db.Departments.FindAsync(id);
-            if (department == null)
-            {
+            Department department = DepartRepos.FindById(id);
+            if (department == null) {
                 return HttpNotFound();
             }
-            ViewBag.InstructorID = new SelectList(db.Instructors, "ID", "LastName", department.InstructorID);
+            IEnumerable<Instructor> instructors = InstructorRepos.FindAll();
+            ViewBag.InstructorID = new SelectList(instructors, "ID", "LastName", department.InstructorID);
             return View(department);
         }
 
         // POST: /Department/Edit/5
-        // Aktivieren Sie zum Schutz vor übermäßigem Senden von Angriffen die spezifischen Eigenschaften, mit denen eine Bindung erfolgen soll. Weitere Informationen 
-        // finden Sie unter http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include="DepartmentID,Name,Budget,StartDate,InstructorID")] Department department)
+        public ActionResult Edit([Bind(Include="DepartmentID,Name,Budget,StartDate,InstructorID")] Department department)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(department).State = EntityState.Modified;
-                await db.SaveChangesAsync();
+                DepartRepos.Update(department);
                 return RedirectToAction("Index");
             }
-            ViewBag.InstructorID = new SelectList(db.Instructors, "ID", "LastName", department.InstructorID);
+            var instructors = InstructorRepos.FindAll();
+            ViewBag.InstructorID = new SelectList(instructors, "ID", "LastName", department.InstructorID);
             return View(department);
         }
 
         // GET: /Department/Delete/5
-        public async Task<ActionResult> Delete(int? id)
+        public ActionResult Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Department department = await db.Departments.FindAsync(id);
+            Department department = DepartRepos.FindById(id);
             if (department == null)
             {
                 return HttpNotFound();
@@ -114,11 +128,9 @@ namespace ContosoUniversity.Controllers
         // POST: /Department/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> DeleteConfirmed(int id)
+        public ActionResult DeleteConfirmed(int id)
         {
-            Department department = await db.Departments.FindAsync(id);
-            db.Departments.Remove(department);
-            await db.SaveChangesAsync();
+            DepartRepos.Remove(id);
             return RedirectToAction("Index");
         }
 
@@ -126,7 +138,8 @@ namespace ContosoUniversity.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                DepartRepos.Dispose();
+                InstructorRepos.Dispose();
             }
             base.Dispose(disposing);
         }

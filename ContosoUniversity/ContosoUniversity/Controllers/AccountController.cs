@@ -422,8 +422,6 @@ namespace ContosoUniversity.Controllers
             email.To = to;
             email.UserName = username;
             email.ConfirmationToken = token;
-            //email.Url = "http://localhost:50092/Account/RegisterConfirmation"; //TODO
-            //string controllerName = HttpContext.Request.RequestContext.RouteData.Values["controller"] as string;
             string hostName = "http://" + Request.Headers["host"];
             string controllerName = ControllerContext.RouteData.Values["controller"] as string;
             string actionName = "RegisterConfirmation";

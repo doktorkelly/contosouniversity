@@ -144,6 +144,7 @@ namespace ContosoUniversity.Controllers
             if (disposing)
             {
                 CourseRepos.Dispose();
+                DepartRepos.Dispose();
             }
             base.Dispose(disposing);
         }

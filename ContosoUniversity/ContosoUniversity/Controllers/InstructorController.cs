@@ -8,6 +8,7 @@ using System.Web;
 using System.Web.Mvc;
 using ContosoUniversity.Models;
 using ContosoUniversity.DAC;
+using ContosoUniversity.DAO;
 using ContosoUniversity.ViewModels;
 using System.Data.Entity.Infrastructure;
 
@@ -15,15 +16,36 @@ namespace ContosoUniversity.Controllers
 {
     public class InstructorController : Controller
     {
-        private SchoolContext db = new SchoolContext();
+        //private SchoolContext db = new SchoolContext();
+        IRepository<Instructor> InstructorRepos;
+        IRepository<Course> CourseRepos;
+        IRepository<Department> DepartmentRepos;
+
+        public InstructorController()
+        {
+            SchoolContext db = new SchoolContext();
+            InstructorRepos = new EFRepository<Instructor>(db);
+            CourseRepos = new EFRepository<Course>(db);
+            DepartmentRepos = new EFRepository<Department>(db);
+        }
+
+        public InstructorController(
+            IRepository<Instructor> instructorRepos, 
+            IRepository<Course> courseRepos,
+            IRepository<Department> departmentRepos)
+        {
+            InstructorRepos = instructorRepos;
+            CourseRepos = courseRepos;
+            DepartmentRepos = departmentRepos;
+        }
 
         // GET: /Instructor/
         public ActionResult Index(int? id, int? courseID)
         {
             var viewModel = new InstructorIndexData();
-            viewModel.Instructors = db.Instructors
-                .Include(i => i.OfficeAssignment)
-                .Include(i => i.Courses.Select(c => c.Department))
+            viewModel.Instructors = InstructorRepos.FindAll()
+                //.Include(i => i.OfficeAssignment)
+                //.Include(i => i.Courses.Select(c => c.Department))
                 .OrderBy(i => i.LastName);
 
             if (id != null) {
@@ -47,13 +69,11 @@ namespace ContosoUniversity.Controllers
         // GET: /Instructor/Details/5
         public ActionResult Details(int? id)
         {
-            if (id == null)
-            {
+            if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Instructor instructor = db.Instructors.Find(id);
-            if (instructor == null)
-            {
+            Instructor instructor = InstructorRepos.FindById(id);
+            if (instructor == null) {
                 return HttpNotFound();
             }
             return View(instructor);
@@ -78,14 +98,13 @@ namespace ContosoUniversity.Controllers
                 instructor.Courses = new List<Course>();
                 foreach (var course in selectedCourses)
                 {
-                    var courseToAdd = db.Courses.Find(int.Parse(course));
+                    var courseToAdd = CourseRepos.FindById(int.Parse(course));
                     instructor.Courses.Add(courseToAdd);
                 }
             }
             if (ModelState.IsValid)
             {
-                db.Instructors.Add(instructor);
-                db.SaveChanges();
+                InstructorRepos.Create(instructor);
                 return RedirectToAction("Index");
             }
             ViewBag.Courses = AssignedCourses(instructor);
@@ -98,9 +117,9 @@ namespace ContosoUniversity.Controllers
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Instructor instructor = db.Instructors
-                .Include(i => i.OfficeAssignment)
-                .Include(i => i.Courses)
+            Instructor instructor = InstructorRepos.FindAll()
+                //.Include(i => i.OfficeAssignment)
+                //.Include(i => i.Courses)
                 .Where(i => i.ID == id)
                 .Single();
             ViewBag.Courses = AssignedCourses(instructor);
@@ -118,9 +137,9 @@ namespace ContosoUniversity.Controllers
             if (id == null) {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            var instructorToUpdate = db.Instructors
-                .Include(i => i.OfficeAssignment)
-                .Include(i => i.Courses)
+            var instructorToUpdate = InstructorRepos.FindAll()
+                //.Include(i => i.OfficeAssignment)
+                //.Include(i => i.Courses)
                 .Where(i => i.ID == id)
                 .Single();
             if (TryUpdateModel(instructorToUpdate, "",
@@ -130,8 +149,8 @@ namespace ContosoUniversity.Controllers
                         instructorToUpdate.OfficeAssignment = null;
                     }
                     UpdateInstructorCourses(selectedCourses, instructorToUpdate);
-                    db.Entry<Instructor>(instructorToUpdate).State = EntityState.Modified;
-                    db.SaveChanges();
+                    //db.Entry<Instructor>(instructorToUpdate).State = EntityState.Modified;
+                    //db.SaveChanges();
                     return RedirectToAction("Index");
                 }
                 catch (RetryLimitExceededException dex) {
@@ -149,7 +168,7 @@ namespace ContosoUniversity.Controllers
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Instructor instructor = db.Instructors.Find(id);
+            Instructor instructor = InstructorRepos.FindById(id);
             if (instructor == null)
             {
                 return HttpNotFound();
@@ -162,24 +181,25 @@ namespace ContosoUniversity.Controllers
         [ValidateAntiForgeryToken]
         public ActionResult DeleteConfirmed(int id)
         {
-            Instructor instructor = db.Instructors
-                .Include(i => i.OfficeAssignment)
+            Instructor instructor = InstructorRepos.FindAll()
+                //.Include(i => i.OfficeAssignment)
                 .Where(i => i.ID == id)
                 .Single();
 
             instructor.OfficeAssignment = null;
 
-            db.Instructors.Remove(instructor);
+            //db.Instructors.Remove(instructor);
+            InstructorRepos.Remove(instructor.ID);
 
-            var department = db.Departments
+            var department = DepartmentRepos.FindAll()
                 .Where(d => d.InstructorID == instructor.ID)
                 .SingleOrDefault();
 
             if (department != null) {
                 department.InstructorID = null;
             }
-
-            db.SaveChanges();
+            DepartmentRepos.Update(department);
+            //db.SaveChanges();
             return RedirectToAction("Index");
         }
 
@@ -187,7 +207,9 @@ namespace ContosoUniversity.Controllers
         {
             if (disposing)
             {
-                db.Dispose();
+                InstructorRepos.Dispose();
+                CourseRepos.Dispose();
+                DepartmentRepos.Dispose();
             }
             base.Dispose(disposing);
         }
@@ -195,7 +217,7 @@ namespace ContosoUniversity.Controllers
         private IList<AssignedCourseData> AssignedCourses(Instructor instructor)
         {
             var viewModel = new List<AssignedCourseData>();
-            var allCourse = db.Courses;
+            var allCourse = CourseRepos.FindAll();
             var instructorCourseIds = new HashSet<int>(instructor.Courses.Select(c => c.CourseID));
             foreach (var course in allCourse)
             {
@@ -218,7 +240,7 @@ namespace ContosoUniversity.Controllers
             var selectedCoursesHS = new HashSet<string>(selectedCourses);
             var instructorCourses = new HashSet<int>
                 (instructorToUpdate.Courses.Select(c => c.CourseID));
-            foreach (var course in db.Courses)
+            foreach (var course in CourseRepos.FindAll())
             {
                 if (selectedCoursesHS.Contains(course.CourseID.ToString())) {
                     if (!instructorCourses.Contains(course.CourseID)) {

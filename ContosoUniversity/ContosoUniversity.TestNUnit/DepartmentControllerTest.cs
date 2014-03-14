@@ -19,7 +19,11 @@ namespace ContosoUniversity.TestNUnit
         {
             //arrange
             var departReposMock = new Mock<IRepository<Department>>();
-            var department = new Department() { DepartmentID = 1, Name = "depart01", StartDate = new DateTime(2014, 01, 01) };
+            var department = new Department() { 
+                DepartmentID = 1, 
+                Name = "depart01", 
+                StartDate = new DateTime(2014, 01, 01) 
+            };
             departReposMock
                 .Setup(r => r.FindById(1))
                 .Returns(department);
@@ -31,6 +35,8 @@ namespace ContosoUniversity.TestNUnit
             //assert
             var model = result.ViewData.Model as Department;
             Assert.AreEqual("depart01", model.Name);
+            Assert.AreEqual(1, model.DepartmentID);
+            Assert.AreEqual(new DateTime(2014, 01, 01), model.StartDate);
         }
     }
 }

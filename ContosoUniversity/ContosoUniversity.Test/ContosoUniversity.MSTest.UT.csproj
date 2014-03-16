@@ -6,8 +6,8 @@
     <ProjectGuid>{4188265D-25EE-467E-BBDC-B41DC359F686}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ContosoUniversity.Test</RootNamespace>
-    <AssemblyName>ContosoUniversity.Test</AssemblyName>
+    <RootNamespace>ContosoUniversity.MSTest.UT</RootNamespace>
+    <AssemblyName>ContosoUniversity.MSTest.UT</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>

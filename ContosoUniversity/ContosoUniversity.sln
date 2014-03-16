@@ -5,14 +5,14 @@ VisualStudioVersion = 12.0.21005.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContosoUniversity", "ContosoUniversity\ContosoUniversity.csproj", "{56BFFF44-AB35-455E-BF2F-12C9C0950D69}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContosoUniversity.Test", "ContosoUniversity.Test\ContosoUniversity.Test.csproj", "{4188265D-25EE-467E-BBDC-B41DC359F686}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContosoUniversity.NUTest.UT", "ContosoUniversity.NUTest\ContosoUniversity.NUTest.UT.csproj", "{C12EF73C-29EE-4B86-BE29-96869BC59248}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContosoUniversity.MSTest.UT", "ContosoUniversity.Test\ContosoUniversity.MSTest.UT.csproj", "{4188265D-25EE-467E-BBDC-B41DC359F686}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".nuget", ".nuget", "{C7744033-5997-4F84-834F-12DFD0E48C0E}"
 	ProjectSection(SolutionItems) = preProject
 		.nuget\packages.config = .nuget\packages.config
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ContosoUniversity.NUTest.UT", "ContosoUniversity.NUTest.UT\ContosoUniversity.NUTest.UT.csproj", "{C12EF73C-29EE-4B86-BE29-96869BC59248}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

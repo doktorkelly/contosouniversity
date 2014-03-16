@@ -11,7 +11,7 @@ using ContosoUniversity.Models;
 using ContosoUniversity.ViewModels;
 using ContosoUniversity.DAO;
 
-namespace ContosoUniversity.Test
+namespace ContosoUniversity.MSTest.UT
 {
     [TestClass]
     public class HomeControllerTest

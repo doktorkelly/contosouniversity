@@ -7,7 +7,7 @@ using ContosoUniversity.Models;
 using Moq;
 using System.Collections.Generic;
 
-namespace ContosoUniversity.Test
+namespace ContosoUniversity.MSTest.UT
 {
     [TestClass]
     public class CourseControllerTest

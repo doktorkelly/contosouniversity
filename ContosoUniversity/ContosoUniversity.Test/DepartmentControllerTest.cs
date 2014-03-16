@@ -7,7 +7,7 @@ using ContosoUniversity.Models;
 using ContosoUniversity.DAO;
 using ContosoUniversity.Controllers;
 
-namespace ContosoUniversity.Test
+namespace ContosoUniversity.MSTest.UT
 {
     [TestClass]
     public class DepartmentControllerTest

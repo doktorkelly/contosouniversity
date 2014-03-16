@@ -9,7 +9,7 @@ using ContosoUniversity.Controllers;
 using ContosoUniversity.DAO;
 using ContosoUniversity.Models;
 
-namespace ContosoUniversity.TestNUnit
+namespace ContosoUniversity.NUTest.UT
 {
     [TestFixture]
     public class DepartmentControllerTest

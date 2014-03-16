@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<Project 
+	DefaultTargets="Show"
+	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+
+		<ProjectName>ContosoUniversity</ProjectName>
+
+		<NUTestExe>packages\NUnit.Runners.2.6.3\tools\nunit-console.exe</NUTestExe>
+		<NUTest-UT-Libs>$(ProjectName).NUTest\bin\$(Configuration)\$(ProjectName).NUTest.dll</NUTest-UT-Libs>
+		<NUTest-IT-Libs>$(ProjectName).NUTest\bin\$(Configuration)\$(ProjectName).NUTest.dll</NUTest-IT-Libs>
+
+		<CoverHome>packages\OpenCover.4.5.2316</CoverHome>
+		<CoverExe>$(CoverHome)\OpenCover.Console.exe</CoverExe>
+
+		<ReportHome>packages\ReportGenerator.1.9.1.0</ReportHome>
+		<ReportExe>$(ReportHome)\ReportGenerator.exe</ReportExe>
+
+		<FxCopHome>tools\FxCop</FxCopHome>
+		<FxCopExe>$(FxCopHome)\FxCopCmd.exe</FxCopExe>
+		<FxCopReport>reports\FxCopReport.xml</FxCopReport>
+
+		<StyleCopHome>packages\StyleCop.MSBuild.4.7.45.0\tools</StyleCopHome>
+		<StyleCopInputFiles>$(ProjectName)\*.cs</StyleCopInputFiles>
+		<StyleCopOutputFile>reports\StyleCopReport.xml</StyleCopOutputFile>
+
+		<NDependExe>E:\Programme\NDepend\NDepend.Console.exe</NDependExe>
+	</PropertyGroup>
+
+	<Target Name="Show" >
+		<Message Text="Configuration:   $(Configuration)" />
+		<Message Text="Targets:" />
+		<Message Text="- Build" />
+		<Message Text="- Test" />
+		<Message Text="- Coverage" />
+		<Message Text="- CoverageReport" />
+		<Message Text="- StyleCop" />
+		<Message Text="- NDepend" />
+	</Target>
+
+	<Target Name="Build" >
+		<MSBuild 
+			Targets="Clean;Rebuild" 
+			Projects="$(ProjectName).sln"
+			ContinueOnError="false" />
+	</Target>
+
+	<Target Name="Test" DependsOnTargets="NUTest;MSTest"/>
+
+	<Target Name="NUTest" >
+		<MakeDir Directories="reports" />
+		<Exec Command="$(NUTestExe) $(NUTest-UT-Libs) /xml=reports/NUnitReport.xml"/>
+	</Target>
+
+	<Target Name="MSTest" >
+		<Message Text="mstest not implemented"/>
+	</Target>
+
+	<Target Name="Coverage" >
+		<MakeDir Directories="reports" />
+		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.dll" -output:"reports/coverage.xml" -filter:"+[$(ProjectName)]* -[*.*Test]*" '/>
+	</Target>
+
+	<Target Name="CoverageReport" >
+		<MakeDir Directories="reports" />
+		<Exec Command='"$(ReportExe)" "-reports:reports\coverage.xml" "-targetdir:reports\html"' />
+	</Target>
+
+	<Target Name="FxCop" >
+		<MakeDir Directories="reports" />
+		<Delete 
+			Condition="Exists('$(FxCopReport)')" 
+			Files="$(FxCopReport)">
+		</Delete>
+		<Exec Command="$(FxCopExe) /f:$(ProjectName)\bin\Debug\$(ProjectName).dll /r:$(FxCopHome)\Rules /o:$(FxCopReport)" />
+	</Target>
+
+	<UsingTask
+		AssemblyFile="$(StyleCopHome)\StyleCop.dll"
+		TaskName="StyleCopTask"/>
+
+	<Target Name="StyleCop">
+		<MakeDir Directories="reports" />
+		<CreateItem Include="$(StyleCopInputFiles)" >
+			<Output TaskParameter="Include" ItemName="StyleCopFiles"/>
+		</CreateItem>
+		<Message Text="StyleCopFiles:           @(StyleCopFiles)"           Importance="Normal"/>
+		<Message Text="MSBuildProjectDirectory: $(MSBuildProjectDirectory)" Importance="Normal"/>
+		<Message Text="StyleCopOutputFile:      $(StyleCopOutputFile)"      Importance="Normal"/>
+		<StyleCopTask
+			ProjectFullPath="$(MSBuildProjectDirectory)"
+			SourceFiles="@(StyleCopFiles)"
+			ForceFullAnalysis="true"
+			TreatErrorsAsWarnings="true"
+			OutputFile="$(StyleCopOutputFile)"
+			CacheResults="true" />
+	</Target>
+
+	<Target Name="NDepend">
+		<Exec 
+			ContinueOnError="true"
+			Command="$(NDependExe) $(MSBuildProjectDirectory)\$(ProjectName).ndproj /OutDir $(MSBuildProjectDirectory)\reports\NDependOut"/>
+	</Target>
+
+</Project>

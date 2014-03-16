@@ -11,7 +11,7 @@ using ContosoUniversity.ViewModels;
 using ContosoUniversity.DAO;
 using System.Web.Mvc;
 
-namespace ContosoUniversity.TestNUnit
+namespace ContosoUniversity.NUTest.UT
 {
     [TestFixture]
     class IntructorControllerTest

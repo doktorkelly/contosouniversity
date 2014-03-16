@@ -37,5 +37,32 @@ namespace ContosoUniversity.NUTest.UT
             Assert.AreEqual(1, viewModel.Instructors.Count());
            
         }
+
+        [Ignore] //because of missing controllerContext mock
+        [Test]
+        public void Edit_WithInstructorsAndNoCourses_CallsReposUpdate()
+        {
+            //arrange
+            var instructorReposMock = new Mock<IRepository<Instructor>>();
+            var instructors = new List<Instructor>() {
+                new Instructor() { ID=1, FirstMidName="fmn01", LastName="ln01"},
+                new Instructor() { ID=2, FirstMidName="fmn02", LastName="ln02"}
+            };
+            instructorReposMock
+                .Setup(r => r.FindAll())
+                .Returns(instructors);
+            var controller = new InstructorController(instructorReposMock.Object, null, null);
+            FormCollection formCollection = null; //TODO
+            string[] selectedCourses = null; //TODO
+
+            //act
+            var result = controller.Edit(1, formCollection, selectedCourses) as RedirectToRouteResult;
+
+            //assert
+            Assert.AreEqual("index", result.RouteValues["action"]);
+            instructorReposMock.Verify(r => r.FindAll(), Times.Once);
+            instructorReposMock.Verify(r => r.Update(It.IsAny<Instructor>()), Times.Once);
+            instructorReposMock.Verify(r => r.Update(It.Is<Instructor>(i => i.Courses != null)));
+        }
     }
 }

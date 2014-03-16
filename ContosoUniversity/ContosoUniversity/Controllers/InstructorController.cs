@@ -149,6 +149,7 @@ namespace ContosoUniversity.Controllers
                         instructorToUpdate.OfficeAssignment = null;
                     }
                     UpdateInstructorCourses(selectedCourses, instructorToUpdate);
+                    InstructorRepos.Update(instructorToUpdate);
                     //db.Entry<Instructor>(instructorToUpdate).State = EntityState.Modified;
                     //db.SaveChanges();
                     return RedirectToAction("Index");

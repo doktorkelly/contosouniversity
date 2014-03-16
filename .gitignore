@@ -24,6 +24,9 @@ bld/
 *.VisualState.xml
 TestResult.xml
 
+#REPORTS
+reports
+
 *_i.c
 *_p.c
 *_i.h

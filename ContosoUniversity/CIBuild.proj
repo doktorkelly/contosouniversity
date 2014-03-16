@@ -4,14 +4,15 @@
 	DefaultTargets="Show"
 	xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
+	<!-- ===================================================================== -->
 	<PropertyGroup>
 		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
 
 		<ProjectName>ContosoUniversity</ProjectName>
 
 		<NUTestExe>packages\NUnit.Runners.2.6.3\tools\nunit-console.exe</NUTestExe>
-		<NUTest-UT-Libs>$(ProjectName).NUTest\bin\$(Configuration)\$(ProjectName).NUTest.dll</NUTest-UT-Libs>
-		<NUTest-IT-Libs>$(ProjectName).NUTest\bin\$(Configuration)\$(ProjectName).NUTest.dll</NUTest-IT-Libs>
+		<NUTest-UT-Libs>$(ProjectName).NUTest.UT\bin\$(Configuration)\$(ProjectName).NUTest.UT.dll</NUTest-UT-Libs>
+		<NUTest-IT-Libs>$(ProjectName).NUTest.IT\bin\$(Configuration)\$(ProjectName).NUTest.IT.dll</NUTest-IT-Libs>
 
 		<CoverHome>packages\OpenCover.4.5.2316</CoverHome>
 		<CoverExe>$(CoverHome)\OpenCover.Console.exe</CoverExe>
@@ -30,17 +31,25 @@
 		<NDependExe>E:\Programme\NDepend\NDepend.Console.exe</NDependExe>
 	</PropertyGroup>
 
+	<!-- ===================================================================== -->
 	<Target Name="Show" >
 		<Message Text="Configuration:   $(Configuration)" />
 		<Message Text="Targets:" />
 		<Message Text="- Build" />
 		<Message Text="- Test" />
+		<Message Text="- NUTest-UT" />
+		<Message Text="- NUTest-IT" />
 		<Message Text="- Coverage" />
+		<Message Text="- Coverage-NUTest-UT" />
+		<Message Text="- Coverage-NUTest-IT" />
 		<Message Text="- CoverageReport" />
+		<Message Text="- CoverageReport-NUTest-UT" />
+		<Message Text="- CoverageReport-NUTest-IT" />
 		<Message Text="- StyleCop" />
 		<Message Text="- NDepend" />
 	</Target>
 
+	<!-- ===================================================================== -->
 	<Target Name="Build" >
 		<MSBuild 
 			Targets="Clean;Rebuild" 
@@ -48,27 +57,43 @@
 			ContinueOnError="false" />
 	</Target>
 
-	<Target Name="Test" DependsOnTargets="NUTest;MSTest"/>
+	<!-- ===================================================================== -->
+	<Target Name="Test" DependsOnTargets="NUTest-UT;NUTest-IT;MSTest-UT;MSTest-IT"/>
 
-	<Target Name="NUTest" >
+	<Target Name="NUTest-UT" >
 		<MakeDir Directories="reports" />
-		<Exec Command="$(NUTestExe) $(NUTest-UT-Libs) /xml=reports/NUnitReport.xml"/>
+		<Exec Command="$(NUTestExe) $(NUTest-UT-Libs) /xml=reports/NUnitUTReport.xml"/>
 	</Target>
 
-	<Target Name="MSTest" >
+	<Target Name="NUTest-IT" >
+		<MakeDir Directories="reports" />
+		<Exec Command="$(NUTestExe) $(NUTest-IT-Libs) /xml=reports/NUnitUTReport.xml"/>
+	</Target>
+
+	<Target Name="MSTest-UT" >
 		<Message Text="mstest not implemented"/>
 	</Target>
 
-	<Target Name="Coverage" >
-		<MakeDir Directories="reports" />
-		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.dll" -output:"reports/coverage.xml" -filter:"+[$(ProjectName)]* -[*.*Test]*" '/>
+	<Target Name="MSTest-IT" >
+		<Message Text="mstest not implemented"/>
 	</Target>
 
-	<Target Name="CoverageReport" >
+	<!-- ===================================================================== -->
+	<Target Name="Coverage" DependsOnTargets="Coverage-NUTest-UT" />
+
+	<Target Name="Coverage-NUTest-UT" >
 		<MakeDir Directories="reports" />
-		<Exec Command='"$(ReportExe)" "-reports:reports\coverage.xml" "-targetdir:reports\html"' />
+		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest.UT\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.UT.dll" -output:"reports/coverageNUTestUT.xml" -filter:"+[$(ProjectName)]* -[*.*Test]*" '/>
 	</Target>
 
+	<Target Name="CoverageReport" DependsOnTargets="CoverageReport-NUTest-UT" />
+
+	<Target Name="CoverageReport-NUTest-UT" >
+		<MakeDir Directories="reports" />
+		<Exec Command='"$(ReportExe)" "-reports:reports\coverageNUTestUT.xml" "-targetdir:reports\html"' />
+	</Target>
+
+	<!-- ===================================================================== -->
 	<Target Name="FxCop" >
 		<MakeDir Directories="reports" />
 		<Delete 
@@ -78,6 +103,7 @@
 		<Exec Command="$(FxCopExe) /f:$(ProjectName)\bin\Debug\$(ProjectName).dll /r:$(FxCopHome)\Rules /o:$(FxCopReport)" />
 	</Target>
 
+	<!-- ===================================================================== -->
 	<UsingTask
 		AssemblyFile="$(StyleCopHome)\StyleCop.dll"
 		TaskName="StyleCopTask"/>
@@ -99,6 +125,7 @@
 			CacheResults="true" />
 	</Target>
 
+	<!-- ===================================================================== -->
 	<Target Name="NDepend">
 		<Exec 
 			ContinueOnError="true"

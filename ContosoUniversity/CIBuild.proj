@@ -54,7 +54,9 @@
 		<MSBuild 
 			Targets="Clean;Rebuild" 
 			Projects="$(ProjectName).sln"
-			ContinueOnError="false" />
+			ContinueOnError="false" 
+			Properties="VisualStudioVersion=12.0" 
+		/>
 	</Target>
 
 	<!-- ===================================================================== -->

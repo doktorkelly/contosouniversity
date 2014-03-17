@@ -74,8 +74,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DepartmentControllerTest.cs" />
-    <Compile Include="IntructorControllerTest.cs" />
+    <Compile Include="Controllers\DepartmentControllerTest.cs" />
+    <Compile Include="Controllers\IntructorControllerTest.cs" />
+    <Compile Include="Models\CourseTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

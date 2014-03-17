@@ -279,32 +279,20 @@
       <DependentUpon>201402171710501_initCUDev.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-
   <PropertyGroup>
-
-		<!-- before 2014.03.16:
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>
-
-  	<Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
-  	<Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
-  	<Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
-		-->
-
-    <VisualStudioVersion>12.0</VisualStudioVersion>
-    <VSToolsPath>$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0</VSToolsPath>
   </PropertyGroup>
 
+
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-	<Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" />
-
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v12.0\WebApplications\Microsoft.WebApplication.targets" />
-
+  <Import Project="$(VSToolsPath)\WebApplications\Microsoft.WebApplication.targets" Condition="'$(VSToolsPath)' != ''" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v10.0\WebApplications\Microsoft.WebApplication.targets" Condition="false" />
 
   <Target Name="MvcBuildViews" AfterTargets="AfterBuild" Condition="'$(MvcBuildViews)'=='true'">
     <AspNetCompiler VirtualPath="temp" PhysicalPath="$(WebProjectOutputDir)" />
   </Target>
+
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
@@ -323,10 +311,23 @@
       </FlavorProperties>
     </VisualStudio>
   </ProjectExtensions>
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-       Other similar extension points exist, see Microsoft.Common.targets.
+
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. Other similar extension points exist, see Microsoft.Common.targets.
+
   <Target Name="BeforeBuild">
+		<Message Text="BeforeBuild:" />
   </Target>
+
   <Target Name="AfterBuild">
-  </Target> -->
+		<Message Text="AfterBuild:" />
+  </Target>
+	-->
+ 
+  <Target Name="Show">
+		<Message Text="BeforeBuild:" />
+		<Message Text="MSBuildBinPath:      $(MSBuildBinPath)" />
+		<Message Text="VSToolsPath:         $(VSToolsPath)" />
+		<Message Text="VisualStudioVersion: $(VisualStudioVersion)" />
+  </Target>
+
 </Project>

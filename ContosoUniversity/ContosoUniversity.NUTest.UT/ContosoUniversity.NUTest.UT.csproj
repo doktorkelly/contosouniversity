@@ -76,6 +76,8 @@
   <ItemGroup>
     <Compile Include="Controllers\DepartmentControllerTest.cs" />
     <Compile Include="Controllers\IntructorControllerTest.cs" />
+    <Compile Include="Helpers\ControllerContextFactory.cs" />
+    <Compile Include="Helpers\ValueProviderFactory.cs" />
     <Compile Include="Models\CourseTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

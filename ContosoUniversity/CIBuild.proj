@@ -12,9 +12,11 @@
 
 		<NUTestExe>packages\NUnit.Runners.2.6.3\tools\nunit-console.exe</NUTestExe>
 		<NUTest-UT-Libs>$(ProjectName).NUTest.UT\bin\$(Configuration)\$(ProjectName).NUTest.UT.dll</NUTest-UT-Libs>
+		<NUTest-UT-Reports>reports\nutest-ut</NUTest-UT-Reports>
 		<NUTest-IT-Libs>$(ProjectName).NUTest.IT\bin\$(Configuration)\$(ProjectName).NUTest.IT.dll</NUTest-IT-Libs>
+		<NUTest-IT-Reports>reports\nutest-it</NUTest-IT-Reports>
 
-		<CoverHome>packages\OpenCover.4.5.2316</CoverHome>
+		<CoverHome>packages\OpenCover.4.5.2506</CoverHome>
 		<CoverExe>$(CoverHome)\OpenCover.Console.exe</CoverExe>
 
 		<ReportHome>packages\ReportGenerator.1.9.1.0</ReportHome>
@@ -63,13 +65,13 @@
 	<Target Name="Test" DependsOnTargets="NUTest-UT;NUTest-IT;MSTest-UT;MSTest-IT"/>
 
 	<Target Name="NUTest-UT" >
-		<MakeDir Directories="reports" />
-		<Exec Command="$(NUTestExe) $(NUTest-UT-Libs) /xml=reports/NUnitUTReport.xml"/>
+		<MakeDir Directories="$(NUTest-UT-Reports)" />
+		<Exec Command="$(NUTestExe) $(NUTest-UT-Libs) /xml=$(NUTest-UT-Reports)/NUnitReport.xml"/>
 	</Target>
 
 	<Target Name="NUTest-IT" >
-		<MakeDir Directories="reports" />
-		<Exec Command="$(NUTestExe) $(NUTest-IT-Libs) /xml=reports/NUnitUTReport.xml"/>
+		<MakeDir Directories="$(NUTest-IT-Reports)" />
+		<Exec Command="$(NUTestExe) $(NUTest-IT-Libs) /xml=$(NUTest-IT-Reports)/NUnitReport.xml"/>
 	</Target>
 
 	<Target Name="MSTest-UT" >
@@ -84,16 +86,27 @@
 	<Target Name="Coverage" DependsOnTargets="Coverage-NUTest-UT" />
 
 	<Target Name="Coverage-NUTest-UT" >
-		<MakeDir Directories="reports" />
-		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest.UT\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.UT.dll" -output:"reports/coverageNUTestUT.xml" -filter:"+[$(ProjectName)]* -[*.*Test]*" '/>
+		<MakeDir Directories="$(NUTest-UT-Reports)" />
+		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest.UT\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.UT.dll" -output:"$(NUTest-UT-Reports)\coverage.xml" -filter:"+[$(ProjectName)]* -[*.*Test]*" '/>
+	</Target>
+
+	<Target Name="Coverage-NUTest-IT" >
+		<MakeDir Directories="$(NUTest-IT-Reports)" />
+		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest.IT\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.IT.dll" -output:"$(NUTest-IT-Reports)\coverage.xml" -filter:"+[$(ProjectName)]* -[*.*Test]*" '/>
 	</Target>
 
 	<Target Name="CoverageReport" DependsOnTargets="CoverageReport-NUTest-UT" />
 
 	<Target Name="CoverageReport-NUTest-UT" >
-		<MakeDir Directories="reports" />
-		<Exec Command='"$(ReportExe)" "-reports:reports\coverageNUTestUT.xml" "-targetdir:reports\html"' />
+		<MakeDir Directories="$(NUTest-UT-Reports)\html" />
+		<Exec Command='"$(ReportExe)" "-reports:$(NUTest-UT-Reports)\coverage.xml" "-targetdir:$(NUTest-UT-Reports)\html"' />
 	</Target>
+
+	<Target Name="CoverageReport-NUTest-IT" >
+		<MakeDir Directories="$(NUTest-IT-Reports)" />
+		<Exec Command='"$(ReportExe)" "-reports:$(NUTest-IT-Reports)\coverage.xml" "-targetdir:$(NUTest-IT-Reports)\html"' />
+	</Target>
+
 
 	<!-- ===================================================================== -->
 	<Target Name="FxCop" >

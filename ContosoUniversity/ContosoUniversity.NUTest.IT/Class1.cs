@@ -8,5 +8,6 @@ namespace ContosoUniversity.NUTest.IT
 {
     public class Class1
     {
+        private static string VERSION = "2014-03-19T17:00:00";
     }
 }

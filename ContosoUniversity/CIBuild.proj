@@ -96,7 +96,7 @@
 
 	<Target Name="Coverage-NUTest-IT" >
 		<MakeDir Directories="$(NUTest-IT-Reports)" />
-		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest.IT\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.IT.dll" -output:"$(NUTest-IT-Reports)\coverage.xml" -filter:"+[$(ProjectName)]* -[*.*Test]*" '/>
+		<Exec Command='"$(CoverExe)" -register:user -target:"$(NUTestExe)" -targetdir:"$(ProjectName).NUTest.IT\bin\$(Configuration)" -targetargs:"$(ProjectName).NUTest.IT.dll" -output:"$(NUTest-IT-Reports)\coverage.xml" "-filter:+[$(ProjectName)]* -[*.*Test]*" '/>
 	</Target>
 
 	<Target Name="CoverageReport" DependsOnTargets="CoverageReport-NUTest-UT" />

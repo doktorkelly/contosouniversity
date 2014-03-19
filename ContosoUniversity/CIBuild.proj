@@ -16,9 +16,9 @@
 
 		<NUTestExe>packages\NUnit.Runners.2.6.3\tools\nunit-console.exe</NUTestExe>
 		<NUTest-UT-Libs>$(ProjectName).NUTest.UT\bin\$(Configuration)\$(ProjectName).NUTest.UT.dll</NUTest-UT-Libs>
-		<NUTest-UT-Reports>reports\nutest-ut</NUTest-UT-Reports>
+		<NUTest-UT-Reports>reports\nutest.ut</NUTest-UT-Reports>
 		<NUTest-IT-Libs>$(ProjectName).NUTest.IT\bin\$(Configuration)\$(ProjectName).NUTest.IT.dll</NUTest-IT-Libs>
-		<NUTest-IT-Reports>reports\nutest-it</NUTest-IT-Reports>
+		<NUTest-IT-Reports>reports\nutest.it</NUTest-IT-Reports>
 
 		<CoverHome>packages\OpenCover.4.5.2506</CoverHome>
 		<CoverExe>$(CoverHome)\OpenCover.Console.exe</CoverExe>

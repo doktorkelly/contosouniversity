@@ -119,7 +119,9 @@
 			Condition="Exists('$(FxCopReport)')" 
 			Files="$(FxCopReport)">
 		</Delete>
-		<Exec Command="$(FxCopExe) /f:$(ProjectName)\bin\Debug\$(ProjectName).dll /r:$(FxCopHome)\Rules /o:$(FxCopReport)" />
+		<Exec 
+			Command="$(FxCopExe) /f:$(ProjectName)\bin\$(ProjectName).dll /r:$(FxCopHome)\Rules /o:$(FxCopReport)" 
+			IgnoreExitCode="true" />
 	</Target>
 
 	<!-- ===================================================================== -->

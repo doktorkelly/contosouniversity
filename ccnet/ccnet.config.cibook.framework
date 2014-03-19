@@ -1,0 +1,142 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+
+<cb:config-template xmlns:cb="urn:ccnet.config.builder">
+
+	<cb:scope
+		msBuild="C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
+		svnExe="C:\Program Files\TortoiseSVN\bin\svn.exe"
+		msBuildLogger="C:\Program Files (x86)\CruiseControl.NET\server\ThoughtWorks.CruiseControl.MSBuild.dll"
+
+		workingDir="C:\CCNet\cibook\Framework"
+		artefactDir="C:\CCNet\cibook\Artifacts.Framework"
+		stateDir="C:\CCNet\cibook\State.Framework"
+		buildFile="Build.proj"
+		>
+		<!-- buildFile="Framework.sln" -->
+
+	<project name="Framework" queue="Q1" queuePriority="0">
+
+    <workingDirectory>$(workingDir)</workingDirectory>
+    <artifactDirectory>$(artefactDir)</artifactDirectory>
+    <state type="state" directory="$(StateDir)" />
+
+		<webURL>http://localhost/ccnet</webURL>
+
+		<triggers>
+			<intervalTrigger name="noname" initialSeconds="0"/>
+		</triggers>
+
+		<sourcecontrol type="svn">
+			<trunkUrl>https://develooper.svn.cloudforge.com/framework</trunkUrl>
+			<executable>$(svnExe)</executable>
+			<username>develooper</username>
+			<password>XXXXXX</password>
+		</sourcecontrol>
+
+		<tasks>
+
+			<!-- result in bin\$(Configuration) -->
+			<msbuild>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>Build</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports/NUnitReport.xml -->
+			<msbuild>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>Test</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports/coverage.xml -->
+			<msbuild>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>Coverage</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\html -->
+			<msbuild>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>CoverageReport</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\FxCopReport.xml -->
+			<msbuild>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>FxCop</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\StyleCopReport.xml -->
+			<msbuild>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>StyleCop</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\NDependOut -->
+			<!-- TODO: activate!
+			<msbuild>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>NDepend</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+			-->
+
+		</tasks>
+
+		<!-- =================================================================== -->
+		<publishers>
+			<merge>
+				<files>
+					<file action="Merge">reports\NUnitReport.xml</file>
+					<file action="Merge">reports\coverage.xml</file>
+					<file action="Merge">reports\FxCopReport.xml</file>
+					<file action="Merge">reports\StyleCopReport.xml</file>
+					<file action="Merge">reports\NDependOut\NDependReport.html</file>
+				</files>
+			</merge>
+			<merge>
+				<files>
+					<file action="Copy">reports\html\*</file>
+				</files>
+				<target>coverage</target>
+			</merge>
+			<merge>
+				<files>
+					<file action="Copy">reports\NDependOut\*</file>
+				</files>
+				<target>ndepend</target>
+			</merge>
+			<merge>
+				<files>
+					<file action="Copy">reports\NDependOut\NDependReportFiles\*</file>
+				</files>
+				<target>ndepend\NDependReportFiles</target>
+			</merge>
+			<xmllogger />
+		</publishers>
+
+	</project>
+
+	</cb:scope>
+
+</cb:config-template>

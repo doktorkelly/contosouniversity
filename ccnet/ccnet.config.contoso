@@ -1,0 +1,203 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+
+<cb:config-template xmlns:cb="urn:ccnet.config.builder">
+
+	<cb:scope
+		msBuild="C:\Windows\Microsoft.NET\Framework\v4.0.30319\MSBuild.exe"
+		gitExe="D:\programme\Git\bin\git.exe"
+		msBuildLogger="C:\Program Files (x86)\CruiseControl.NET\server\ThoughtWorks.CruiseControl.MSBuild.dll"
+
+		checkoutDir="C:\CCNet\contoso\checkoutdir"
+		solutionDir="C:\CCNet\contoso\checkoutdir\ContosoUniversity"
+		artefactDir="C:\CCNet\contoso\Artifacts"
+		stateDir="C:\CCNet\contoso\State"
+		buildFile="CIBuild.proj"
+
+		reports="ContosoUniversity\reports"
+		reportsMSTestIT="ContosoUniversity\reports\mstest.it"
+		reportsMSTestUT="ContosoUniversity\reports\mstest.ut"
+		reportsNUTestIT="ContosoUniversity\reports\nutest.it"
+		reportsNUTestUT="ContosoUniversity\reports\nutest.ut"
+		>
+
+	<project name="Contoso" queue="Q1" queuePriority="1">
+
+  <workingDirectory>$(checkoutDir)</workingDirectory>
+  <artifactDirectory>$(artefactDir)</artifactDirectory>
+  <state type="state" directory="$(StateDir)" />
+
+		<webURL>http://localhost/ccnet</webURL>
+
+		<triggers>
+			<intervalTrigger name="noname" initialSeconds="0"/>
+		</triggers>
+
+		<sourcecontrol type="git">
+			<repository>https://doktorkelly:XXXXXXXX@github.com/doktorkelly/contosouniversity.git</repository>
+			<executable>$(gitExe)</executable>
+		</sourcecontrol>
+
+		<tasks>
+
+			<!-- ================================================================= -->
+			<!-- build                                                             -->
+			<!-- result in bin\$(Configuration) -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>Build</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+
+
+			<!-- ================================================================= -->
+			<!-- test and coverage Unit Tests (UT)                                 -->
+			<!-- result in reports/NUnitReport.xml -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>NUTest-UT</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports/coverage.xml -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>Coverage-NUTest-UT</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\html -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>CoverageReport-NUTest-UT</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- ================================================================= -->
+			<!-- test and coverage Integration Tests (IT)                          -->
+			<!-- result in reports/NUnitReport.xml -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>NUTest-IT</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports/coverage.xml -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>Coverage-NUTest-IT</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\html -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>CoverageReport-NUTest-IT</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- ================================================================= -->
+			<!-- code analysing                                                    -->
+			<!-- result in reports\FxCopReport.xml -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>FxCop</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\StyleCopReport.xml -->
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>StyleCop</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+
+			<!-- result in reports\NDependOut -->
+			<!-- TODO: activate!
+			<msbuild>
+  			<workingDirectory>$(solutionDir)</workingDirectory>
+				<executable>$(msBuild)</executable>
+				<projectFile>$(buildFile)</projectFile>
+				<targets>NDepend</targets>
+				<buildArgs>/v:minimal /p:Configuration=Debug</buildArgs>
+				<logger>$(msBuildLogger)</logger>
+			</msbuild>
+			-->
+
+		</tasks>
+
+		<!-- =================================================================== -->
+		<publishers>
+			<merge>
+				<files>
+					<file action="Merge">$(reportsNUTestUT)\NUnitReport.xml</file>
+					<file action="Merge">$(reportsNUTestIT)\NUnitReport.xml</file>
+					<file action="Merge">$(reportsNUTestUT)\coverage.xml</file>
+					<file action="Merge">$(reports)\FxCopReport.xml</file>
+					<file action="Merge">$(reports)\StyleCopReport.xml</file>
+					<file action="Merge">$(reports)\NDependOut\NDependReport.html</file>
+				</files>
+			</merge>
+
+			<merge>
+				<files>
+					<file action="Copy">$(reportsNUTestUT)\html\*</file>
+				</files>
+				<target>nutest.ut.coverage</target>
+			</merge>
+			<merge>
+				<files>
+					<file action="Copy">$(reportsNUTestIT)\html\*</file>
+				</files>
+				<target>nutest.it.coverage</target>
+			</merge>
+
+			<merge>
+				<files>
+					<file action="Copy">$(reports)\NDependOut\*</file>
+				</files>
+				<target>ndepend</target>
+			</merge>
+			<merge>
+				<files>
+					<file action="Copy">$(reports)\NDependOut\NDependReportFiles\*</file>
+				</files>
+				<target>ndepend\NDependReportFiles</target>
+			</merge>
+
+			<xmllogger />
+		</publishers>
+
+	</project>
+
+	</cb:scope>
+
+</cb:config-template>
